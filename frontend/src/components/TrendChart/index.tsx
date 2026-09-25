@@ -20,21 +20,21 @@ export function TrendChart({ data, height = 200, dataKey = "revenue", title }: P
   if (!data.length) return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      {title && <span className="text-label">{title}</span>}
+    <div className="flex flex-col gap-2">
+      {title && <span className="text-mono-eyebrow">{title}</span>}
       <ResponsiveContainer width="100%" height={height}>
         <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid stroke="var(--hairline)" strokeDasharray="0" vertical={false} />
           <XAxis
             dataKey="period"
             tickFormatter={formatPeriod}
-            tick={{ fontSize: 11, fill: "var(--mute)", fontFamily: "Lato, sans-serif" }}
+            tick={{ fontSize: 11, fill: "var(--mute)", fontFamily: "var(--font-sans)" }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={(v) => formatCompactCurrency(v)}
-            tick={{ fontSize: 11, fill: "var(--mute)", fontFamily: "Lato, sans-serif" }}
+            tick={{ fontSize: 11, fill: "var(--mute)", fontFamily: "var(--font-sans)" }}
             axisLine={false}
             tickLine={false}
             width={60}
@@ -49,8 +49,8 @@ export function TrendChart({ data, height = 200, dataKey = "revenue", title }: P
               border: "1px solid var(--hairline)",
               borderRadius: "var(--radius-sm)",
               fontSize: 12,
-              fontFamily: "Lato, sans-serif",
-              boxShadow: "var(--shadow-float)",
+              fontFamily: "var(--font-sans)",
+              boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
             }}
           />
           <Line

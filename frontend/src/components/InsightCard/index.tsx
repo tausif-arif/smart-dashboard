@@ -16,82 +16,64 @@ const ICON_MAP = {
   trend_change: <TrendingDown size={14} />,
 };
 
-const TYPE_STYLE: Record<string, { bg: string; color: string }> = {
-  anomaly: { bg: "#fef3c7", color: "#92400e" },
-  decline: { bg: "#fee2e2", color: "#b91c1c" },
-  growth: { bg: "#dcfce7", color: "#166534" },
-  opportunity: { bg: "#dbeafe", color: "#1e40af" },
-  risk: { bg: "#fee2e2", color: "#b91c1c" },
-  unusual_behavior: { bg: "#fef3c7", color: "#92400e" },
-  trend_change: { bg: "#f3e8ff", color: "#6b21a8" },
+const TYPE_STYLE: Record<string, string> = {
+  anomaly: "bg-warning-soft text-warning-deep",
+  decline: "bg-error-soft text-error-deep",
+  growth: "bg-success-soft text-success",
+  opportunity: "bg-link-soft text-link-deep",
+  risk: "bg-error-soft text-error-deep",
+  unusual_behavior: "bg-warning-soft text-warning-deep",
+  trend_change: "bg-violet/10 text-violet",
 };
 
 export function InsightCard({ insight }: Props) {
-  const style = TYPE_STYLE[insight.type] ?? TYPE_STYLE.anomaly;
+  const styleClass = TYPE_STYLE[insight.type] ?? TYPE_STYLE.anomaly;
 
   return (
-    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+    <div className="feature-card p-4 flex flex-col gap-3">
       {/* Header */}
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+      <div className="flex items-start gap-2.5">
         <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "4px 8px",
-            borderRadius: "var(--radius-full)",
-            background: style.bg,
-            color: style.color,
-            fontSize: 11,
-            fontWeight: 700,
-            gap: 4,
-            flexShrink: 0,
-          }}
+          className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-[11px] font-bold gap-1 shrink-0 ${styleClass}`}
         >
           {ICON_MAP[insight.type]}
           {insight.type.replace(/_/g, " ")}
         </span>
         <span
-          className={`badge ${insight.severity === "high" ? "badge-down" : insight.severity === "medium" ? "" : "badge-flat"}`}
-          style={insight.severity === "medium" ? { background: "#fef3c7", color: "#92400e" } : {}}
+          className={`px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center ${insight.severity === "high" ? "bg-error-soft text-error-deep" : insight.severity === "medium" ? "bg-warning-soft text-warning-deep" : "bg-hairline text-body"}`}
         >
           {insight.severity}
         </span>
         {insight.change_pct !== null && (
-          <span className={`badge ${insight.change_pct < 0 ? "badge-down" : "badge-up"}`} style={{ marginLeft: "auto" }}>
+          <span className={`ml-auto px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center ${insight.change_pct < 0 ? "bg-error-soft text-error" : "bg-success-soft text-success"}`}>
             {formatPercent(insight.change_pct)}
           </span>
         )}
       </div>
 
       {/* Title */}
-      <p style={{ fontWeight: 700, color: "var(--ink)", fontSize: "0.9rem", lineHeight: 1.3 }}>
+      <p className="font-bold text-ink text-sm leading-snug m-0">
         {insight.title}
       </p>
 
       {/* Explanation */}
-      <p className="text-body" style={{ fontSize: "0.8rem" }}>
+      <p className="text-body-sm text-body m-0">
         {insight.explanation}
       </p>
 
       {/* Evidence */}
       {insight.evidence && (
-        <div style={{
-          background: "var(--hairline-soft)",
-          border: "1px solid var(--hairline)",
-          borderRadius: "var(--radius-sm)",
-          padding: "8px 10px",
-        }}>
-          <span className="text-mono" style={{ display: "block", marginBottom: 2 }}>Evidence</span>
-          <span style={{ fontSize: "0.75rem", color: "var(--body)" }}>{insight.evidence}</span>
+        <div className="bg-hairline-soft border border-hairline rounded-sm px-2.5 py-2">
+          <span className="block text-mono-eyebrow text-[10px] mb-0.5">Evidence</span>
+          <span className="text-[12px] text-body">{insight.evidence}</span>
         </div>
       )}
 
       {/* Actions */}
       {insight.actions.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        <div className="flex flex-wrap gap-1.5">
           {insight.actions.map((action) => (
-            <button key={action} className="btn-ghost btn" style={{ fontSize: "0.75rem", height: 26, padding: "0 8px" }}>
+            <button key={action} className="text-[12px] font-medium text-link hover:text-link-deep bg-transparent border border-link-soft hover:bg-link-soft px-2 py-1 rounded-sm transition-colors cursor-pointer">
               {action}
             </button>
           ))}

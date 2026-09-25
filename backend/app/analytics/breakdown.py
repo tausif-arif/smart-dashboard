@@ -23,7 +23,10 @@ async def breakdown_by_dimension(
         "country": Store.country,
         "state": Store.state,
         "customer_country": Customer.country,
+        "customer_state": Customer.state,
+        "customer_city": Customer.city,
         "customer_continent": Customer.continent,
+        "city": Customer.city,
     }
     if dimension not in allowed:
         raise ValueError(f"Invalid dimension: {dimension}. Allowed: {list(allowed.keys())}")
@@ -57,7 +60,7 @@ async def breakdown_by_dimension(
 
     if dimension in ("country", "state"):
         stmt = stmt.join(Store, Sale.storekey == Store.storekey)
-    elif dimension in ("customer_country", "customer_continent"):
+    elif dimension in ("customer_country", "customer_state", "customer_city", "customer_continent", "city"):
         stmt = stmt.join(Customer, Sale.customerkey == Customer.customerkey)
 
     stmt = (

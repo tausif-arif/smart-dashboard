@@ -14,29 +14,24 @@ export function BreakdownList({ title, items }: BreakdownProps) {
   const maxRevenue = items[0].revenue;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      <span className="text-label">{title}</span>
+    <div className="flex flex-col gap-3">
+      <span className="text-mono-eyebrow">{title}</span>
       {items.map((item) => (
-        <div key={item.label} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: "0.8rem", color: "var(--ink)", fontWeight: 400 }}>{item.label}</span>
-            <span style={{ fontSize: "0.8rem", color: "var(--ink)", fontWeight: 700 }}>
+        <div key={item.label} className="flex flex-col gap-1">
+          <div className="flex justify-between items-center">
+            <span className="text-[13px] text-ink">{item.label}</span>
+            <span className="text-[13px] text-ink font-bold">
               {formatCompactCurrency(item.revenue)}
-              <span style={{ fontWeight: 400, color: "var(--mute)", marginLeft: 4 }}>
+              <span className="font-normal text-mute ml-1">
                 {item.share_pct.toFixed(1)}%
               </span>
             </span>
           </div>
           {/* Progress bar */}
-          <div style={{ height: 4, background: "var(--hairline)", borderRadius: "var(--radius-full)" }}>
+          <div className="h-1 bg-hairline rounded-full overflow-hidden">
             <div
-              style={{
-                height: "100%",
-                borderRadius: "var(--radius-full)",
-                background: "var(--ink)",
-                width: `${(item.revenue / maxRevenue) * 100}%`,
-                transition: "width 0.4s ease",
-              }}
+              className="h-full bg-ink rounded-full transition-all duration-400 ease-in-out"
+              style={{ width: `${(item.revenue / maxRevenue) * 100}%` }}
             />
           </div>
         </div>
@@ -56,25 +51,19 @@ export function DriverList({ title, items }: DriverProps) {
   if (!items.length) return null;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <span className="text-label">{title}</span>
-      {items.map((item) => (
+    <div className="flex flex-col gap-2.5">
+      <span className="text-mono-eyebrow">{title}</span>
+      {items.map((item, index) => (
         <div
           key={item.label}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "8px 0",
-            borderBottom: "1px solid var(--hairline)",
-          }}
+          className={`flex items-center justify-between py-2 ${index < items.length - 1 ? "border-b border-hairline" : ""}`}
         >
-          <span style={{ fontSize: "0.8rem", color: "var(--body)" }}>{item.label}</span>
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <span style={{ fontSize: "0.8rem", fontWeight: 700, color: item.direction === "up" ? "#16a34a" : "#dc2626" }}>
+          <span className="text-[13px] text-body">{item.label}</span>
+          <div className="flex items-center gap-2">
+            <span className={`text-[13px] font-bold ${item.direction === "up" ? "text-success" : "text-error"}`}>
               {formatCompactCurrency(Math.abs(item.change))} {item.direction === "up" ? "+" : "−"}
             </span>
-            <span className={`badge ${item.direction === "up" ? "badge-up" : "badge-down"}`}>
+            <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-medium flex items-center gap-0.5 ${item.direction === "up" ? "bg-success-soft text-success" : "bg-error-soft text-error"}`}>
               {item.direction === "up" ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
               {item.change_pct !== null ? `${Math.abs(item.change_pct).toFixed(1)}%` : "New"}
             </span>

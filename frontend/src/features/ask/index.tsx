@@ -2,21 +2,23 @@ import { useState, useRef, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { post } from "@/lib/api";
 import type { AIResponse } from "@/types/api.types";
-import { Send, ChevronRight } from "lucide-react";
+import { Send, Sparkles, ArrowUpRight, CheckCircle2, TrendingUp, TrendingDown, HelpCircle, Lightbulb, AlertCircle } from "lucide-react";
 import { Topbar } from "@/app/Topbar";
 
 interface Message {
+  id: string;
   role: "user" | "assistant";
   content: AIResponse | string;
+  timestamp: string;
 }
 
 const SUGGESTED_QUESTIONS = [
   "Why did revenue change this year?",
   "Which product categories are growing fastest?",
-  "Which countries are the top performers?",
-  "What changed this month vs last month?",
+  "Which countries or states have the highest sales?",
+  "What is the customer distribution by city and country?",
   "Which customers are buying the most?",
-  "Are there any unusual sales patterns?",
+  "Are there any unusual sales patterns or anomalies?",
 ];
 
 export function AskPage() {
@@ -28,18 +30,27 @@ export function AskPage() {
   const askMutation = useMutation({
     mutationFn: (q: string) =>
       post<AIResponse>("/api/ask", { question: q, conversation_id: conversationId }),
-    onSuccess: (data, q) => {
+    onSuccess: (data) => {
       setConversationId(data.conversation_id);
       setMessages((prev) => [
         ...prev,
-        { role: "user", content: q },
-        { role: "assistant", content: data },
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          content: data,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
       ]);
     },
     onError: (err: Error) => {
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: `Error: ${err.message}` },
+        {
+          id: `assistant-err-${Date.now()}`,
+          role: "assistant",
+          content: `Analytics Service Error: ${err.message || "Connection timeout. Please verify backend server."}`,
+          timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        },
       ]);
     },
   });
@@ -49,63 +60,78 @@ export function AskPage() {
   }, [messages, askMutation.isPending]);
 
   function handleSubmit(q: string) {
-    if (!q.trim() || askMutation.isPending) return;
+    const trimmed = q.trim();
+    if (!trimmed || askMutation.isPending) return;
+
+    const userMsg: Message = {
+      id: `user-${Date.now()}`,
+      role: "user",
+      content: trimmed,
+      timestamp: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+
+    setMessages((prev) => [...prev, userMsg]);
     setQuestion("");
-    askMutation.mutate(q.trim());
+    askMutation.mutate(trimmed);
   }
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
-      <Topbar title="Ask Anything" subtitle="Ask natural language questions about your business" />
+    <div className="flex-1 flex flex-col h-[100dvh] md:h-auto bg-canvas">
+      <Topbar title="Ask Anything" subtitle="Instant business intelligence powered by AI analytics" />
 
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", padding: "24px 32px", gap: 24, overflowY: "auto" }}>
-
-        {/* Empty state with suggestions */}
+      <div className="flex-1 flex flex-col p-4 md:p-6 lg:p-8 gap-6 overflow-y-auto">
+        
+        {/* Suggested Prompts Grid */}
         {messages.length === 0 && !askMutation.isPending && (
-          <div style={{ maxWidth: 640, margin: "0 auto", width: "100%" }}>
-            <p className="text-label" style={{ marginBottom: 16 }}>Suggested questions</p>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+          <div className="max-w-3xl w-full mx-auto mt-6">
+            <div className="flex items-center gap-2 mb-4 text-ink">
+              <div className="p-1.5 rounded-sm bg-hairline-soft">
+                <Sparkles size={16} />
+              </div>
+              <p className="text-label-sm m-0">Suggested Prompts</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {SUGGESTED_QUESTIONS.map((q) => (
                 <button
                   key={q}
-                  className="btn btn-ghost"
-                  style={{ textAlign: "left", height: "auto", padding: "10px 14px", justifyContent: "flex-start", fontSize: "0.8rem" }}
                   onClick={() => handleSubmit(q)}
+                  className="text-left p-4 rounded-md border border-hairline bg-canvas-elevated hover:bg-hairline-soft transition-colors flex items-center justify-between group"
                 >
-                  <ChevronRight size={12} style={{ flexShrink: 0 }} />
-                  {q}
+                  <span className="text-body-md text-ink pr-2">{q}</span>
+                  <ArrowUpRight size={14} className="text-mute group-hover:text-ink shrink-0" />
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Messages */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 20, maxWidth: 760, width: "100%", margin: "0 auto" }}>
-          {messages.map((msg, i) => (
-            <div key={i}>
+        {/* Conversation Thread */}
+        <div className="flex flex-col gap-6 max-w-3xl w-full mx-auto pb-4">
+          {messages.map((msg) => (
+            <div key={msg.id} className="flex flex-col gap-1.5">
               {msg.role === "user" ? (
-                <UserMessage content={msg.content as string} />
+                <UserBubble content={msg.content as string} timestamp={msg.timestamp} />
               ) : (
-                <AssistantMessage response={msg.content as AIResponse | string} />
+                <AssistantCard
+                  response={msg.content as AIResponse | string}
+                  timestamp={msg.timestamp}
+                  onSelectQuestion={(q) => handleSubmit(q)}
+                />
               )}
             </div>
           ))}
 
-          {/* Loading state */}
+          {/* Loading Indicator */}
           {askMutation.isPending && (
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span className="text-mono" style={{ color: "var(--mute)" }}>Analyzing your question…</span>
-              <div style={{ display: "flex", gap: 4 }}>
-                {["Checking metrics", "Comparing periods", "Finding contributors"].map((step, i) => (
-                  <span key={step} style={{
-                    fontSize: "0.7rem",
-                    color: "var(--mute)",
-                    padding: "2px 8px",
-                    borderRadius: "var(--radius-full)",
-                    border: "1px solid var(--hairline)",
-                    animation: `skeleton-pulse 1.5s ease-in-out ${i * 0.3}s infinite`,
-                  }}>
+            <div className="flex flex-col gap-3 p-5 rounded-md bg-canvas-elevated border border-hairline shadow-whisper">
+              <div className="flex items-center gap-2.5">
+                <Sparkles size={16} className="text-ink animate-pulse" />
+                <span className="text-label-sm">Analyzing database & running metrics...</span>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {["Querying repository", "Calculating metrics"].map((step) => (
+                  <span key={step} className="text-body-sm bg-hairline-soft px-3 py-1 rounded-full text-mute">
                     {step}
                   </span>
                 ))}
@@ -116,38 +142,24 @@ export function AskPage() {
         </div>
       </div>
 
-      {/* Input */}
-      <div style={{
-        borderTop: "1px solid var(--hairline)",
-        padding: "16px 32px",
-        background: "var(--canvas-elevated)",
-      }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", display: "flex", gap: 8 }}>
+      {/* Input Dock */}
+      <div className="border-t border-hairline bg-canvas-elevated p-4 md:px-8 pb-safe">
+        <div className="max-w-3xl mx-auto flex gap-3 items-center">
           <input
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSubmit(question)}
-            placeholder="Ask anything about your business…"
+            placeholder="Ask a question..."
             disabled={askMutation.isPending}
-            style={{
-              flex: 1,
-              border: "1px solid var(--hairline)",
-              borderRadius: "var(--radius-sm)",
-              padding: "9px 14px",
-              fontSize: "0.875rem",
-              color: "var(--ink)",
-              background: "var(--canvas-elevated)",
-              outline: "none",
-              fontFamily: "var(--font-sans)",
-            }}
+            className="flex-1 border border-hairline rounded-sm px-4 py-3 text-body-md text-ink bg-canvas-elevated focus:outline-none focus:border-ink transition-colors"
           />
           <button
-            className="btn btn-primary"
             onClick={() => handleSubmit(question)}
             disabled={!question.trim() || askMutation.isPending}
+            className="btn-primary"
           >
-            <Send size={14} />
-            Ask
+            <Send size={15} className="mr-1" />
+            <span className="hidden sm:inline">Ask</span>
           </button>
         </div>
       </div>
@@ -155,96 +167,128 @@ export function AskPage() {
   );
 }
 
-function UserMessage({ content }: { content: string }) {
+function UserBubble({ content, timestamp }: { content: string; timestamp: string }) {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-end" }}>
-      <div style={{
-        background: "var(--ink)",
-        color: "#fff",
-        borderRadius: "var(--radius-md) var(--radius-md) 4px var(--radius-md)",
-        padding: "10px 14px",
-        fontSize: "0.875rem",
-        maxWidth: "70%",
-      }}>
+    <div className="flex flex-col items-end gap-1 w-full">
+      <div className="bg-ink text-on-primary rounded-2xl rounded-tr-sm px-4 py-3 text-body-md max-w-[90%] md:max-w-[80%] shadow-whisper break-words">
         {content}
       </div>
+      <span className="text-body-sm text-mute pr-1">{timestamp}</span>
     </div>
   );
 }
 
-function AssistantMessage({ response }: { response: AIResponse | string }) {
+function AssistantCard({
+  response,
+  timestamp,
+  onSelectQuestion,
+}: {
+  response: AIResponse | string;
+  timestamp: string;
+  onSelectQuestion: (q: string) => void;
+}) {
   if (typeof response === "string") {
+    const isError = response.includes("Error");
     return (
-      <div className="card" style={{ fontSize: "0.875rem", color: "var(--body)" }}>{response}</div>
+      <div className={`p-4 rounded-md border text-body-md flex items-center gap-2.5 ${isError ? 'bg-error-soft text-error-deep border-error' : 'bg-canvas-elevated border-hairline text-ink'}`}>
+        {isError && <AlertCircle size={16} className="shrink-0" />}
+        <span>{response}</span>
+      </div>
     );
   }
 
   const r = response;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-      {/* Summary */}
-      <div className="card">
-        <p style={{ fontWeight: 700, color: "var(--ink)", fontSize: "0.9rem", marginBottom: 6 }}>
-          {r.summary}
-        </p>
-
-        {/* Findings */}
-        {r.findings.length > 0 && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 12 }}>
-            {r.findings.map((f, i) => (
-              <div key={i} style={{ borderLeft: "2px solid var(--hairline)", paddingLeft: 12 }}>
-                <p style={{ fontWeight: 700, fontSize: "0.8rem", color: "var(--ink)" }}>{f.title}</p>
-                <p style={{ fontSize: "0.8rem", color: "var(--body)", marginTop: 2 }}>{f.detail}</p>
-                {f.evidence && (
-                  <p style={{ fontSize: "0.75rem", color: "var(--mute)", marginTop: 2, fontStyle: "italic" }}>
-                    Evidence: {f.evidence}
-                  </p>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Drivers */}
-        {r.drivers.length > 0 && (
-          <div style={{ marginTop: 12 }}>
-            <p className="text-mono" style={{ marginBottom: 8 }}>Main Drivers</p>
-            {r.drivers.map((d, i) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid var(--hairline)", fontSize: "0.8rem" }}>
-                <span style={{ color: "var(--body)" }}>{d.label}</span>
-                <span style={{ fontWeight: 700, color: d.direction === "up" ? "#16a34a" : "#dc2626" }}>
-                  {d.impact}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Recommended Actions */}
-        {r.recommended_actions.length > 0 && (
-          <div style={{ marginTop: 12 }}>
-            <p className="text-mono" style={{ marginBottom: 8 }}>What to investigate</p>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-              {r.recommended_actions.map((action, i) => (
-                <span key={i} className="btn btn-ghost" style={{ fontSize: "0.75rem", height: 26, padding: "0 10px", cursor: "default" }}>
-                  {action}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+    <div className="flex flex-col gap-5 bg-canvas-elevated border border-hairline rounded-md p-5 md:p-6 shadow-whisper w-full">
+      {/* Header Summary */}
+      <div className="flex gap-3 items-start">
+        <div className="w-8 h-8 rounded-full bg-hairline-soft flex items-center justify-center shrink-0">
+          <Sparkles size={16} className="text-ink" />
+        </div>
+        <div className="flex-1">
+          <p className="text-heading-md mb-1">{r.summary}</p>
+          <span className="text-body-sm text-mute">{timestamp}</span>
+        </div>
       </div>
 
-      {/* Follow-up questions */}
-      {r.follow_up_questions.length > 0 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          <span className="text-caption" style={{ width: "100%", marginBottom: 2 }}>Continue exploring:</span>
-          {r.follow_up_questions.map((q, i) => (
-            <button key={i} className="btn btn-ghost" style={{ fontSize: "0.75rem", height: "auto", padding: "4px 10px" }}>
-              {q}
-            </button>
+      {/* Findings */}
+      {r.findings && r.findings.length > 0 && (
+        <div className="flex flex-col gap-3 mt-1">
+          {r.findings.map((f, i) => (
+            <div key={i} className="bg-canvas border-l-2 border-ink p-3.5 rounded-r-sm">
+              <p className="text-label-sm mb-1">{f.title}</p>
+              <p className="text-body-md text-body mb-0">{f.detail}</p>
+              {f.evidence && (
+                <div className="mt-2 inline-flex items-center gap-1.5 bg-canvas-elevated px-2.5 py-1 rounded-sm border border-hairline">
+                  <CheckCircle2 size={12} className="text-ink" />
+                  <span className="text-body-sm">{f.evidence}</span>
+                </div>
+              )}
+            </div>
           ))}
+        </div>
+      )}
+
+      {/* Key Growth Drivers */}
+      {r.drivers && r.drivers.length > 0 && (
+        <div className="border-t border-hairline pt-4">
+          <p className="text-mono-eyebrow mb-3">Key Growth Drivers</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {r.drivers.map((d, i) => (
+              <div key={i} className="flex justify-between items-center bg-canvas border border-hairline rounded-sm p-3">
+                <span className="text-body-md font-medium text-ink">{d.label}</span>
+                <div className={`flex items-center gap-1 font-medium text-body-md ${d.direction === "up" ? "text-ink" : "text-error"}`}>
+                  {d.direction === "up" ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                  <span>{d.impact}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Recommended Action Items */}
+      {r.recommended_actions && r.recommended_actions.length > 0 && (
+        <div className="border-t border-hairline pt-4">
+          <div className="flex items-center gap-1.5 mb-3">
+            <Lightbulb size={14} className="text-ink" />
+            <p className="text-mono-eyebrow m-0">Recommended Actions</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            {r.recommended_actions.map((action, i) => (
+              <button
+                key={i}
+                onClick={() => onSelectQuestion(`Analyze action item: ${action}`)}
+                className="text-left bg-canvas border border-hairline hover:bg-hairline-soft rounded-sm p-3 text-body-md text-ink flex items-center justify-between transition-colors group"
+              >
+                <span>{action}</span>
+                <ArrowUpRight size={14} className="shrink-0 text-mute group-hover:text-ink" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Follow-up Questions */}
+      {r.follow_up_questions && r.follow_up_questions.length > 0 && (
+        <div className="border-t border-hairline pt-4 flex flex-col gap-3">
+          <div className="flex items-center gap-1.5">
+            <HelpCircle size={14} className="text-ink" />
+            <span className="text-mono-eyebrow">Continue Exploring</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {r.follow_up_questions.map((q, i) => (
+              <button
+                key={i}
+                onClick={() => onSelectQuestion(q)}
+                className="btn-ghost-sm h-auto py-1.5 px-3 rounded-full"
+              >
+                <span>{q}</span>
+                <ArrowUpRight size={12} className="ml-1 opacity-70" />
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

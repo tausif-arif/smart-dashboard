@@ -19,17 +19,17 @@ export function CustomersPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar
         title="Customers"
         subtitle={data ? `${data.period} vs ${data.prior_period}` : undefined}
       />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 32 }}>
+      <div className="flex flex-col gap-8 p-4 md:p-8 overflow-y-auto">
         {/* Volume Metrics */}
         <section>
-          <p className="text-mono" style={{ marginBottom: 16 }}>Volume</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+          <h2 className="text-mono-eyebrow mb-4">Volume</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
             {isLoading ? (
               Array.from({ length: 3 }).map((_, i) => <MetricSkeleton key={i} />)
             ) : isError ? (
@@ -47,42 +47,40 @@ export function CustomersPage() {
         {/* Behavior Summary */}
         {data?.behavior && (
           <section>
-            <p className="text-mono" style={{ marginBottom: 16 }}>Behavior</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12 }}>
+            <h2 className="text-mono-eyebrow mb-4">Behavior</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {/* Repeat Rate */}
-              <div className="card">
-                <span className="text-mono">Repeat Purchase Rate</span>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginTop: 6 }}>
-                  <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--ink)" }}>
-                    {data.behavior.repeat_rate_pct.toFixed(1)}%
-                  </span>
+              <div className="feature-card p-4">
+                <span className="text-mono-eyebrow text-[10px]">Repeat Purchase Rate</span>
+                <div className="flex items-baseline gap-2 mt-2">
+                  <span className="text-heading-lg">{data.behavior.repeat_rate_pct.toFixed(1)}%</span>
                   {data.repeat_rate_change !== null && (
-                    <span style={{ fontSize: "0.8rem", color: data.repeat_rate_change >= 0 ? "#16a34a" : "#dc2626", fontWeight: 700 }}>
-                      {data.repeat_rate_change >= 0 ? <TrendingUp size={12} style={{ display: "inline" }} /> : <TrendingDown size={12} style={{ display: "inline" }} />}
+                    <span className={`text-label-sm flex items-center ${data.repeat_rate_change >= 0 ? "text-success" : "text-error"}`}>
+                      {data.repeat_rate_change >= 0 ? <TrendingUp size={12} className="mr-0.5" /> : <TrendingDown size={12} className="mr-0.5" />}
                       {data.repeat_rate_change >= 0 ? "+" : ""}{data.repeat_rate_change.toFixed(1)}pp
                     </span>
                   )}
                 </div>
-                <p className="text-caption" style={{ marginTop: 4 }}>
+                <p className="text-body-sm mt-1">
                   {data.behavior.repeat_customers.toLocaleString()} of {data.behavior.total_customers.toLocaleString()} customers
                 </p>
               </div>
 
               {/* Avg Orders */}
-              <div className="card">
-                <span className="text-mono">Avg Orders per Customer</span>
-                <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--ink)", display: "block", marginTop: 6 }}>
+              <div className="feature-card p-4">
+                <span className="text-mono-eyebrow text-[10px]">Avg Orders per Customer</span>
+                <span className="text-heading-lg block mt-2">
                   {data.behavior.avg_orders_per_customer.toFixed(1)}
                 </span>
               </div>
 
               {/* Single Order */}
-              <div className="card">
-                <span className="text-mono">Single-Order Customers</span>
-                <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--ink)", display: "block", marginTop: 6 }}>
+              <div className="feature-card p-4">
+                <span className="text-mono-eyebrow text-[10px]">Single-Order Customers</span>
+                <span className="text-heading-lg block mt-2">
                   {formatNumber(data.behavior.single_order_customers)}
                 </span>
-                <p className="text-caption" style={{ marginTop: 4 }}>
+                <p className="text-body-sm mt-1">
                   {((data.behavior.single_order_customers / data.behavior.total_customers) * 100).toFixed(1)}% of total
                 </p>
               </div>
@@ -92,23 +90,23 @@ export function CustomersPage() {
 
         {/* Top Customers */}
         {data?.behavior?.top_customers && (
-          <section className="card">
-            <p className="text-label" style={{ marginBottom: 16 }}>Top Customers by Revenue</p>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+          <section className="feature-card p-4 overflow-x-auto">
+            <h2 className="text-mono-eyebrow mb-4">Top Customers by Revenue</h2>
+            <table className="w-full text-left border-collapse min-w-[500px]">
               <thead>
-                <tr style={{ borderBottom: "1px solid var(--hairline)" }}>
+                <tr className="border-b border-hairline">
                   {["Name", "Country", "Revenue", "Orders"].map((h) => (
-                    <th key={h} style={{ textAlign: "left", padding: "6px 8px", color: "var(--mute)", fontWeight: 700, fontSize: "0.7rem" }}>{h}</th>
+                    <th key={h} className="pb-2 text-mono-eyebrow">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-body-sm">
                 {data.behavior.top_customers.map((c) => (
-                  <tr key={c.customerkey} style={{ borderBottom: "1px solid var(--hairline-soft)" }}>
-                    <td style={{ padding: "8px", color: "var(--ink)", fontWeight: 400 }}>{c.name}</td>
-                    <td style={{ padding: "8px", color: "var(--body)" }}>{c.country}</td>
-                    <td style={{ padding: "8px", fontWeight: 700 }}>{formatCompactCurrency(c.revenue)}</td>
-                    <td style={{ padding: "8px", color: "var(--body)" }}>{c.orders}</td>
+                  <tr key={c.customerkey} className="border-b border-hairline-soft">
+                    <td className="py-2 text-ink pr-4">{c.name}</td>
+                    <td className="py-2 text-body pr-4">{c.country}</td>
+                    <td className="py-2 text-ink font-medium pr-4">{formatCompactCurrency(c.revenue)}</td>
+                    <td className="py-2 text-body pr-4">{c.orders}</td>
                   </tr>
                 ))}
               </tbody>
@@ -118,9 +116,9 @@ export function CustomersPage() {
 
         {/* Geographic breakdown */}
         {data && (
-          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div className="card"><BreakdownList title="Revenue by Customer Country" items={data.by_country} /></div>
-            <div className="card"><BreakdownList title="Revenue by Continent" items={data.by_continent} /></div>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="feature-card p-4"><BreakdownList title="Revenue by Customer Country" items={data.by_country} /></div>
+            <div className="feature-card p-4"><BreakdownList title="Revenue by Continent" items={data.by_continent} /></div>
           </section>
         )}
       </div>

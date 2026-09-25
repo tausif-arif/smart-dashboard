@@ -13,24 +13,24 @@ export function DataStatusPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar title="Data Status" subtitle="Database health and data coverage" />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 24, maxWidth: 700 }}>
+      <div className="flex flex-col gap-6 p-4 md:p-8 max-w-3xl overflow-y-auto">
         {isLoading ? (
-          <p className="text-caption">Checking data status…</p>
+          <p className="text-body-sm text-mute">Checking data status…</p>
         ) : isError ? (
           <ErrorState message="Failed to connect to the database." onRetry={refetch} />
         ) : data ? (
           <>
             {/* Status Banner */}
-            <div className="card-sm" style={{ display: "flex", alignItems: "center", gap: 10, borderLeft: `3px solid ${data.is_stale ? "var(--warning)" : "#16a34a"}` }}>
-              {data.is_stale ? <AlertCircle size={16} color="var(--warning)" /> : <CheckCircle size={16} color="#16a34a" />}
+            <div className={`feature-card p-4 flex items-center gap-3 border-l-4 ${data.is_stale ? "border-l-warning" : "border-l-success"}`}>
+              {data.is_stale ? <AlertCircle size={20} className="text-warning shrink-0" /> : <CheckCircle size={20} className="text-success shrink-0" />}
               <div>
-                <p style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--ink)" }}>
+                <p className="text-body-md font-bold text-ink m-0">
                   {data.is_stale ? "Data may be stale" : "Data is current"}
                 </p>
-                <p className="text-caption">
+                <p className="text-body-sm text-mute m-0 mt-0.5">
                   Last checked: {new Date(data.last_checked).toLocaleString()}
                 </p>
               </div>
@@ -38,9 +38,9 @@ export function DataStatusPage() {
 
             {/* Sales date range */}
             {data.sales_date_range?.min && (
-              <div className="card-sm">
-                <span className="text-mono">Sales Data Coverage</span>
-                <p style={{ marginTop: 6, fontSize: "0.875rem", color: "var(--body)" }}>
+              <div className="feature-card p-4">
+                <span className="text-mono-eyebrow">Sales Data Coverage</span>
+                <p className="text-body-md text-body mt-2">
                   {data.sales_date_range.min} — {data.sales_date_range.max}
                 </p>
               </div>
@@ -48,24 +48,17 @@ export function DataStatusPage() {
 
             {/* Table counts */}
             <div>
-              <p className="text-mono" style={{ marginBottom: 12 }}>Table Row Counts</p>
-              <div style={{ display: "flex", flexDirection: "column", gap: 0, border: "1px solid var(--hairline)", borderRadius: "var(--radius-md)", overflow: "hidden" }}>
+              <h2 className="text-mono-eyebrow mb-3">Table Row Counts</h2>
+              <div className="flex flex-col border border-hairline rounded-md overflow-hidden bg-canvas-elevated">
                 {data.tables.map((t, i) => (
-                  <div key={t.table} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "12px 16px",
-                    borderBottom: i < data.tables.length - 1 ? "1px solid var(--hairline)" : "none",
-                    background: "var(--canvas-elevated)",
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      <Database size={14} color="var(--mute)" />
-                      <span style={{ fontSize: "0.875rem", color: "var(--ink)", fontFamily: "var(--font-mono)" }}>
+                  <div key={t.table} className={`flex items-center justify-between p-3 md:px-4 md:py-3 ${i < data.tables.length - 1 ? "border-b border-hairline" : ""}`}>
+                    <div className="flex items-center gap-2">
+                      <Database size={14} className="text-mute" />
+                      <span className="text-body-sm font-mono text-ink">
                         {t.table}
                       </span>
                     </div>
-                    <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--body)" }}>
+                    <span className="text-body-sm font-bold text-body">
                       {t.row_count.toLocaleString()} rows
                     </span>
                   </div>

@@ -1,5 +1,6 @@
-import { NavLink } from "react-router-dom";
-import { LayoutDashboard, MessageSquare, Lightbulb, BarChart2, Users, Package, Database, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
+import { LayoutDashboard, MessageSquare, Lightbulb, BarChart2, Users, Package, Database, Menu, X, Moon, Sun } from "lucide-react";
 import { BRAND_CONFIG } from "@/config/brand";
 
 const NAV = [
@@ -13,53 +14,103 @@ const NAV = [
 ];
 
 export function Sidebar() {
+  const [isOpen, setIsOpen] = useState(false);
+  const location = useLocation();
+
+  const [isDark, setIsDark] = useState(() => {
+    return document.documentElement.classList.contains("dark") || 
+           (localStorage.theme === "dark") || 
+           (!("theme" in localStorage) && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+      localStorage.theme = "dark";
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.theme = "light";
+    }
+  }, [isDark]);
+
+  // Close drawer on route change on mobile
+  useEffect(() => {
+    setIsOpen(false);
+  }, [location]);
+
   return (
-    <nav style={{
-      width: 220,
-      minWidth: 220,
-      background: "var(--canvas-elevated)",
-      borderRight: "1px solid var(--hairline)",
-      display: "flex",
-      flexDirection: "column",
-      padding: "20px 0",
-      height: "100vh",
-      position: "sticky",
-      top: 0,
-      overflowY: "auto",
-    }}>
-      {/* Brand */}
-      <div style={{ padding: "0 16px 20px", borderBottom: "1px solid var(--hairline)", marginBottom: 8 }}>
-        <span style={{ fontWeight: 900, fontSize: "0.95rem", color: "var(--ink)", letterSpacing: "-0.02em" }}>
+    <>
+      {/* Mobile Top Header */}
+      <header className="md:hidden h-[52px] bg-canvas-elevated border-b border-hairline flex items-center justify-between px-4 sticky top-0 z-40">
+        <span className="font-semibold text-ink text-[16px] tracking-tight">
           {BRAND_CONFIG.shortName}
         </span>
-      </div>
-
-      {/* Nav items */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 8px" }}>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end}
-            style={({ isActive }) => ({
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "7px 10px",
-              borderRadius: "var(--radius-sm)",
-              fontSize: "0.8rem",
-              fontWeight: isActive ? 700 : 400,
-              color: isActive ? "var(--ink)" : "var(--body)",
-              background: isActive ? "var(--hairline-soft)" : "transparent",
-              textDecoration: "none",
-              transition: "background 0.1s, color 0.1s",
-            })}
+        <div className="flex items-center gap-2">
+          <button onClick={() => setIsDark(!isDark)} className="p-1.5 text-mute hover:text-ink transition-colors">
+            {isDark ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+          <button
+            onClick={() => setIsOpen(!isOpen)}
+            className="btn-ghost-sm h-[32px] px-2 flex items-center gap-1.5"
           >
-            {item.icon}
-            {item.label}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
+            {isOpen ? <X size={16} /> : <Menu size={16} />}
+            <span className="text-body-sm font-medium">Menu</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Slide-over Overlay */}
+      {isOpen && (
+        <div
+          onClick={() => setIsOpen(false)}
+          className="md:hidden fixed inset-0 bg-ink/20 backdrop-blur-sm z-40"
+        />
+      )}
+
+      {/* Sidebar Drawer / Permanent Sidebar */}
+      <aside
+        className={`fixed md:sticky top-[52px] md:top-0 bottom-0 left-0 w-[240px] bg-canvas-elevated border-r border-hairline z-50 flex flex-col pt-4 md:pt-6 pb-4 transform transition-transform duration-200 ease-in-out md:translate-x-0 overflow-y-auto ${
+          isOpen ? "translate-x-0 shadow-floating" : "-translate-x-full md:shadow-none"
+        }`}
+      >
+        <div className="hidden md:block px-4 mb-6 border-b border-hairline-soft pb-4">
+          <span className="font-semibold text-[16px] text-ink tracking-tight">
+            {BRAND_CONFIG.shortName}
+          </span>
+        </div>
+        
+        <div className="px-3 flex-1 flex flex-col gap-1">
+          {NAV.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2 rounded-sm text-body-md transition-colors ${
+                  isActive
+                    ? "bg-hairline-soft text-ink font-medium"
+                    : "text-body hover:bg-hairline-soft/50 hover:text-ink"
+                }`
+              }
+            >
+              <div className={({ isActive }: any) => isActive ? "text-ink" : "text-mute"}>
+                {item.icon}
+              </div>
+              {item.label}
+            </NavLink>
+          ))}
+        </div>
+        
+        <div className="hidden md:flex px-4 mt-auto border-t border-hairline-soft pt-4">
+          <button 
+            onClick={() => setIsDark(!isDark)}
+            className="flex items-center gap-2 text-body hover:text-ink transition-colors text-body-sm font-medium"
+          >
+            {isDark ? <Sun size={14} /> : <Moon size={14} />}
+            {isDark ? "Light Mode" : "Dark Mode"}
+          </button>
+        </div>
+      </aside>
+    </>
   );
 }

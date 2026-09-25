@@ -14,7 +14,6 @@ from app.analytics.customer import get_customer_behavior
 from app.analytics.date_utils import resolve_period, comparable_prior_period, format_period_label
 
 
-# Tool definitions for OpenAI function-calling
 TOOL_SCHEMAS = [
     {
         "type": "function",
@@ -31,7 +30,7 @@ TOOL_SCHEMAS = [
                     },
                     "period": {
                         "type": "string",
-                        "description": "Named period (e.g. 'this_year', 'last_month', 'this_month', 'YYYY-MM-DD:YYYY-MM-DD')",
+                        "description": "Named period (e.g. 'this_year', 'last_month', 'this_month', 'all')",
                     },
                 },
                 "required": ["metric", "period"],
@@ -56,13 +55,13 @@ TOOL_SCHEMAS = [
         "type": "function",
         "function": {
             "name": "breakdown_metric",
-            "description": "Break down revenue by a business dimension (category, brand, country, etc.).",
+            "description": "Break down revenue/orders by a business dimension (category, brand, country, state, city, etc.).",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "dimension": {
                         "type": "string",
-                        "enum": ["category", "subcategory", "brand", "product_name", "country", "state", "customer_country", "customer_continent"],
+                        "enum": ["category", "subcategory", "brand", "product_name", "country", "state", "city", "customer_country", "customer_state", "customer_city", "customer_continent"],
                     },
                     "period": {"type": "string"},
                     "limit": {"type": "integer", "default": 5},
@@ -81,7 +80,7 @@ TOOL_SCHEMAS = [
                 "properties": {
                     "dimension": {
                         "type": "string",
-                        "enum": ["category", "subcategory", "brand", "country", "customer_country"],
+                        "enum": ["category", "subcategory", "brand", "country", "state", "city", "customer_country", "customer_city"],
                     },
                     "period": {"type": "string"},
                     "limit": {"type": "integer", "default": 5},
@@ -139,8 +138,6 @@ TOOL_SCHEMAS = [
 
 
 async def execute_tool(tool_name: str, arguments: dict, db: AsyncSession) -> Any:
-    """Execute a validated analytics tool call. Never executes arbitrary SQL."""
-
     def get_range(period: str):
         start, end = resolve_period(period)
         return start, end

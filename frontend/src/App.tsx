@@ -23,9 +23,9 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div style={{ display: "flex", minHeight: "100vh", background: "var(--canvas)" }}>
+        <div className="flex flex-col md:flex-row min-h-[100dvh] w-full bg-canvas text-ink">
           <Sidebar />
-          <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "auto" }}>
+          <main className="flex-1 flex flex-col min-w-0 w-full md:max-w-7xl md:mx-auto">
             <Routes>
               <Route path="/" element={<OverviewPage />} />
               <Route path="/ask" element={<AskPage />} />

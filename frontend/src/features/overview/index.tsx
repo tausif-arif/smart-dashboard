@@ -19,18 +19,18 @@ export function OverviewPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar
         title="Overview"
         subtitle={data ? `${data.period} vs ${data.prior_period}` : undefined}
       />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 32 }}>
+      <div className="flex flex-col gap-8 p-4 md:p-8 overflow-y-auto">
 
         {/* Key Metrics */}
         <section>
-          <p className="text-mono" style={{ marginBottom: 16 }}>Key Metrics</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+          <h2 className="text-mono-eyebrow mb-4">Key Metrics</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => <MetricSkeleton key={i} />)
             ) : isError ? (
@@ -50,7 +50,7 @@ export function OverviewPage() {
 
         {/* Revenue Trend */}
         {data?.revenue_trend && data.revenue_trend.length > 0 && (
-          <section className="card">
+          <section className="feature-card p-4">
             <TrendChart data={data.revenue_trend} title="Revenue Trend" height={220} />
           </section>
         )}
@@ -58,8 +58,8 @@ export function OverviewPage() {
         {/* Intelligence Summary */}
         {(isLoading || (data?.insights && data.insights.length > 0)) && (
           <section>
-            <p className="text-mono" style={{ marginBottom: 16 }}>What changed</p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+            <h2 className="text-mono-eyebrow mb-4">What changed</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {isLoading ? (
                 Array.from({ length: 3 }).map((_, i) => <CardSkeleton key={i} />)
               ) : (
@@ -73,11 +73,11 @@ export function OverviewPage() {
 
         {/* Business Drivers */}
         {data && (
-          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div className="card">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="feature-card p-4">
               <BreakdownList title="Revenue by Category" items={data.top_categories} />
             </div>
-            <div className="card">
+            <div className="feature-card p-4">
               <BreakdownList title="Revenue by Country" items={data.top_countries} />
             </div>
           </section>
@@ -86,18 +86,18 @@ export function OverviewPage() {
         {/* Anomalies */}
         {data?.anomalies && data.anomalies.length > 0 && (
           <section>
-            <p className="text-mono" style={{ marginBottom: 16 }}>Anomalies Detected</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <h2 className="text-mono-eyebrow mb-4">Anomalies Detected</h2>
+            <div className="flex flex-col gap-2">
               {data.anomalies.map((a) => (
-                <div key={a.period} className="card-sm" style={{ borderLeft: `3px solid ${a.severity === "high" ? "var(--error)" : "var(--warning)"}` }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div key={a.period} className={`feature-card p-3 border-l-4 ${a.severity === "high" ? "border-l-error" : "border-l-warning"}`}>
+                  <div className="flex justify-between items-start gap-4">
                     <div>
-                      <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--ink)" }}>
+                      <p className="text-label-sm m-0">
                         {a.period.slice(0, 7)} — {a.direction === "above" ? "Higher" : "Lower"} than usual
                       </p>
-                      <p className="text-body" style={{ fontSize: "0.75rem", marginTop: 2 }}>{a.evidence}</p>
+                      <p className="text-body-sm mt-1">{a.evidence}</p>
                     </div>
-                    <span className={`badge ${a.severity === "high" ? "severity-high" : "severity-medium"}`} style={{ flexShrink: 0 }}>
+                    <span className={`px-2 py-0.5 rounded-sm text-[10px] font-medium tracking-wide uppercase shrink-0 ${a.severity === "high" ? "bg-error-soft text-error-deep" : "bg-warning-soft text-warning-deep"}`}>
                       {a.magnitude}
                     </span>
                   </div>

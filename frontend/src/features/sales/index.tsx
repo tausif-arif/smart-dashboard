@@ -18,18 +18,18 @@ export function SalesPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar
         title="Sales"
         subtitle={data ? `${data.period} vs ${data.prior_period}` : undefined}
       />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 32 }}>
+      <div className="flex flex-col gap-8 p-4 md:p-8 overflow-y-auto">
 
         {/* Metrics */}
         <section>
-          <p className="text-mono" style={{ marginBottom: 16 }}>Performance</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+          <h2 className="text-mono-eyebrow mb-4">Performance</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <MetricSkeleton key={i} />)
             ) : isError ? (
@@ -46,15 +46,19 @@ export function SalesPage() {
         </section>
 
         {/* Trend */}
-        {data?.trend && <div className="card"><TrendChart data={data.trend} title="Revenue Over Time" height={220} /></div>}
+        {data?.trend && (
+          <section className="feature-card p-4">
+            <TrendChart data={data.trend} title="Revenue Over Time" height={220} />
+          </section>
+        )}
 
         {/* Drivers */}
         {data && (
-          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div className="card">
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="feature-card p-4">
               <DriverList title="Category Contributors vs Prior Period" items={data.category_drivers} />
             </div>
-            <div className="card">
+            <div className="feature-card p-4">
               <DriverList title="Country Contributors vs Prior Period" items={data.country_drivers} />
             </div>
           </section>
@@ -62,10 +66,10 @@ export function SalesPage() {
 
         {/* Breakdown */}
         {data && (
-          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-            <div className="card"><BreakdownList title="By Category" items={data.by_category} /></div>
-            <div className="card"><BreakdownList title="By Country" items={data.by_country} /></div>
-            <div className="card"><BreakdownList title="By Brand" items={data.by_brand} /></div>
+          <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="feature-card p-4"><BreakdownList title="By Category" items={data.by_category} /></div>
+            <div className="feature-card p-4"><BreakdownList title="By Country" items={data.by_country} /></div>
+            <div className="feature-card p-4"><BreakdownList title="By Brand" items={data.by_brand} /></div>
           </section>
         )}
       </div>

@@ -23,13 +23,17 @@ export function MetricSummary({ label, data, type = "currency", suffix = "", pri
   const changeText = is_new ? "New" : formatPercent(growth_pct);
 
   return (
-    <div className="card" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-      <span className="text-mono">{label}</span>
-      <span style={{ fontSize: "1.75rem", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.03em" }}>
+    <div className="feature-card p-4 flex flex-col gap-2">
+      <span className="text-mono-eyebrow">{label}</span>
+      <span className="text-heading-xl tracking-tight text-ink">
         {displayValue}
       </span>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span className={`badge ${direction === "up" ? "badge-up" : direction === "down" ? "badge-down" : "badge-flat"}`}>
+      <div className="flex items-center gap-2">
+        <span className={`px-2 py-0.5 rounded-full text-[11px] font-medium flex items-center gap-1 ${
+          direction === "up" ? "bg-success-soft text-success" : 
+          direction === "down" ? "bg-error-soft text-error" : 
+          "bg-hairline text-body"
+        }`}>
           {direction === "up" ? (
             <TrendingUp size={11} />
           ) : direction === "down" ? (
@@ -40,7 +44,7 @@ export function MetricSummary({ label, data, type = "currency", suffix = "", pri
           {changeText}
         </span>
         {priorPeriod && (
-          <span className="text-caption">vs {priorPeriod}</span>
+          <span className="text-body-sm text-mute">vs {priorPeriod}</span>
         )}
       </div>
     </div>

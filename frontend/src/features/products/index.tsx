@@ -18,17 +18,17 @@ export function ProductsPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar
         title="Products"
         subtitle={data ? `${data.period} vs ${data.prior_period}` : undefined}
       />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 32 }}>
+      <div className="flex flex-col gap-8 p-4 md:p-8 overflow-y-auto">
         {/* Metrics */}
         <section>
-          <p className="text-mono" style={{ marginBottom: 16 }}>Performance</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))", gap: 12 }}>
+          <h2 className="text-mono-eyebrow mb-4">Performance</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {isLoading ? (
               Array.from({ length: 4 }).map((_, i) => <MetricSkeleton key={i} />)
             ) : isError ? (
@@ -46,24 +46,24 @@ export function ProductsPage() {
 
         {/* Top Products Table */}
         {data?.top_products && (
-          <section className="card">
-            <p className="text-label" style={{ marginBottom: 16 }}>Top Products by Revenue</p>
-            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8rem" }}>
+          <section className="feature-card p-4 overflow-x-auto">
+            <h2 className="text-mono-eyebrow mb-4">Top Products by Revenue</h2>
+            <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr style={{ borderBottom: "1px solid var(--hairline)" }}>
+                <tr className="border-b border-hairline">
                   {["Product", "Revenue", "Orders", "Units", "Share"].map((h) => (
-                    <th key={h} style={{ textAlign: "left", padding: "6px 8px", color: "var(--mute)", fontWeight: 700, fontSize: "0.7rem" }}>{h}</th>
+                    <th key={h} className="pb-2 text-mono-eyebrow">{h}</th>
                   ))}
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="text-body-sm">
                 {data.top_products.map((p, i) => (
-                  <tr key={i} style={{ borderBottom: "1px solid var(--hairline-soft)" }}>
-                    <td style={{ padding: "8px", color: "var(--ink)", fontWeight: 400, maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.label}</td>
-                    <td style={{ padding: "8px", fontWeight: 700 }}>{formatCompactCurrency(p.revenue)}</td>
-                    <td style={{ padding: "8px", color: "var(--body)" }}>{p.orders.toLocaleString()}</td>
-                    <td style={{ padding: "8px", color: "var(--body)" }}>{p.units_sold.toLocaleString()}</td>
-                    <td style={{ padding: "8px", color: "var(--mute)" }}>{p.share_pct}%</td>
+                  <tr key={i} className="border-b border-hairline-soft">
+                    <td className="py-2 text-ink max-w-[280px] overflow-hidden text-ellipsis whitespace-nowrap pr-4">{p.label}</td>
+                    <td className="py-2 text-ink font-medium pr-4">{formatCompactCurrency(p.revenue)}</td>
+                    <td className="py-2 text-body pr-4">{p.orders.toLocaleString()}</td>
+                    <td className="py-2 text-body pr-4">{p.units_sold.toLocaleString()}</td>
+                    <td className="py-2 text-mute pr-4">{p.share_pct}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -73,15 +73,15 @@ export function ProductsPage() {
 
         {/* Category & Brand breakdown */}
         {data && (
-          <section style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-            <div className="card"><BreakdownList title="By Category" items={data.by_category} /></div>
-            <div className="card"><BreakdownList title="By Brand" items={data.by_brand} /></div>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="feature-card p-4"><BreakdownList title="By Category" items={data.by_category} /></div>
+            <div className="feature-card p-4"><BreakdownList title="By Brand" items={data.by_brand} /></div>
           </section>
         )}
 
         {/* Period contributors */}
         {data?.period_contributors && data.period_contributors.length > 0 && (
-          <div className="card">
+          <div className="feature-card p-4">
             <DriverList title="Category Change vs Prior Period" items={data.period_contributors} />
           </div>
         )}

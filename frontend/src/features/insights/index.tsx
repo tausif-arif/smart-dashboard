@@ -16,12 +16,12 @@ export function InsightsPage() {
   });
 
   return (
-    <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+    <div className="flex-1 flex flex-col min-w-0 bg-canvas">
       <Topbar title="Insights" subtitle={data ? `${data.count} insights detected for ${data.period}` : undefined} />
 
-      <div style={{ padding: "32px", display: "flex", flexDirection: "column", gap: 16 }}>
+      <div className="flex flex-col gap-4 p-4 md:p-8 overflow-y-auto">
         {isLoading ? (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 12 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)}
           </div>
         ) : isError ? (
@@ -29,7 +29,7 @@ export function InsightsPage() {
         ) : !data?.insights.length ? (
           <EmptyState message="No significant insights detected for this period." />
         ) : (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))", gap: 12 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
             {data.insights.map((insight) => (
               <InsightCard key={insight.id} insight={insight} />
             ))}

@@ -1,5 +1,4 @@
 import { useDashboardStore } from "@/stores/dashboardStore";
-import { BRAND_CONFIG } from "@/config/brand";
 import type { Period } from "@/types/api.types";
 import { periodLabel } from "@/lib/format";
 
@@ -16,39 +15,17 @@ export function Topbar({ title, subtitle }: Props) {
   const { period, setPeriod } = useDashboardStore();
 
   return (
-    <div style={{
-      borderBottom: "1px solid var(--hairline)",
-      padding: "16px 32px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      background: "var(--canvas-elevated)",
-      position: "sticky",
-      top: 0,
-      zIndex: 10,
-    }}>
+    <div className="sticky top-[52px] md:top-0 z-10 flex flex-col md:flex-row md:items-center justify-between gap-3 px-4 py-3 md:px-8 md:py-4 bg-canvas-elevated border-b border-hairline shadow-whisper">
       <div>
-        <h1 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.01em" }}>
-          {title}
-        </h1>
-        {subtitle && <p className="text-caption">{subtitle}</p>}
+        <h1 className="text-heading-md m-0">{title}</h1>
+        {subtitle && <p className="text-body-sm text-mute m-0 mt-0.5">{subtitle}</p>}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div className="flex items-center gap-2">
         <select
           value={period}
           onChange={(e) => setPeriod(e.target.value as Period)}
-          style={{
-            border: "1px solid var(--hairline)",
-            borderRadius: "var(--radius-sm)",
-            padding: "5px 10px",
-            fontSize: "0.8rem",
-            color: "var(--ink)",
-            background: "var(--canvas-elevated)",
-            cursor: "pointer",
-            fontFamily: "var(--font-sans)",
-            outline: "none",
-          }}
+          className="bg-canvas-elevated text-ink border border-hairline rounded-sm px-2.5 py-1.5 text-body-sm font-medium focus:outline-none focus:border-ink transition-colors cursor-pointer"
         >
           {PERIODS.map((p) => (
             <option key={p} value={p}>{periodLabel(p)}</option>
