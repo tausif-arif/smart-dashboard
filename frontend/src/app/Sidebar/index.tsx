@@ -69,7 +69,7 @@ export function Sidebar() {
 
       {/* Sidebar Drawer / Permanent Sidebar */}
       <aside
-        className={`fixed md:sticky top-[52px] md:top-0 bottom-0 left-0 w-[240px] bg-canvas-elevated border-r border-hairline z-50 flex flex-col pt-4 md:pt-6 pb-4 transform transition-transform duration-200 ease-in-out md:translate-x-0 overflow-y-auto ${
+        className={`fixed md:sticky top-[52px] md:top-0 bottom-0 md:h-screen left-0 w-[240px] bg-canvas-elevated border-r border-hairline z-50 flex flex-col pt-4 md:pt-6 pb-4 transform transition-transform duration-200 ease-in-out md:translate-x-0 overflow-y-auto ${
           isOpen ? "translate-x-0 shadow-floating" : "-translate-x-full md:shadow-none"
         }`}
       >
